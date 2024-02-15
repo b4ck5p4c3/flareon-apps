@@ -31,3 +31,5 @@ npx envienc decrypt
 npx envienc encrypt
 
 ```
+
+Decryption key is in RØ possession. If you need to access the data, contact RØ.
