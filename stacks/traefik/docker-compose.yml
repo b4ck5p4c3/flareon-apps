@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: "traefik:v2.11"
+    container_name: "traefik"
+    restart: unless-stopped
+    command:
+      - "--log.level=ERROR"
+      - "--entrypoints.web.address=:3000"
+      - "--entrypoints.web.forwardedheaders.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.watch=true"
+      - "--providers.docker.network=traefik"
+      - "--providers.docker.exposedByDefault=false"
+    ports:
+      - "3000:3000"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - traefik
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  traefik:
+    external: true

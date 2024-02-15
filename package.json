@@ -1,0 +1,10 @@
+{
+  "name": "infrastructure-apps",
+  "version": "1.0.0",
+  "description": "",
+  "author": "B4CKSP4CE Team & Contributors <info@0x08.in>",
+  "license": "MIT",
+  "dependencies": {
+    "envienc": "^2.2.1"
+  }
+}

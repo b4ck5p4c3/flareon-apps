@@ -1,0 +1,51 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:14-alpine
+    user: postgres
+    env_file: ".env.postgres"
+    networks:
+      - outline
+    volumes:
+      - "outline_postgres:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis:
+    image: redis:alpine
+    networks:
+      - outline
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  wiki:
+    image: docker.getoutline.com/outlinewiki/outline:latest
+    restart: unless-stopped
+    env_file: ".env.outline"
+    networks:
+      - traefik
+      - outline
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wiki.entrypoints=web"
+      - "traefik.http.routers.wiki.rule=Host(`wiki.0x08.in`)"
+      - "traefik.http.routers.wiki.middlewares=wiki-redirect-root-to-sharedlink"
+      - "traefik.http.services.wiki-svc.loadbalancer.server.port=3000"
+      - "traefik.http.middlewares.wiki-redirect-root-to-sharedlink.redirectregex.regex=^http://wiki.0x08.in/?$$"
+      - "traefik.http.middlewares.wiki-redirect-root-to-sharedlink.redirectregex.replacement=https://wiki.0x08.in/s/public"
+    depends_on:
+      - redis
+      - postgres
+
+networks:
+  outline:
+  traefik:
+    external: true
+
+volumes:
+  outline_postgres:

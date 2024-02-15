@@ -1,0 +1,8 @@
+# Environment
+**/*.env
+**/*.env.*
+!**/.env.*.envienc
+!**/.env.envienc
+
+# Node
+node_modules

@@ -1,0 +1,52 @@
+version: "3.9"
+services:
+  app:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    image: ghcr.io/logto-io/logto:1
+    entrypoint: ["sh", "-c", "npm run cli db seed -- --swe && npm start"]
+    restart: unless-stopped
+    env_file: ".env.logto"
+    ports:
+      - "127.0.0.1:3002:3002"
+    networks:
+      - traefik
+      - logto
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sso.rule=Host(`id.0x08.in`)
+      - traefik.http.routers.sso.entrypoints=web
+      - traefik.http.routers.sso.service=sso
+      - traefik.http.services.sso.loadbalancer.server.port=3001
+  postgres:
+    image: postgres:14-alpine
+    user: postgres
+    env_file: ".env.postgres"
+    networks:
+      - logto
+    volumes:
+      - "logto_postgres:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis:
+    image: redis:alpine
+    networks:
+      - logto
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  traefik:
+    external: true
+  logto:
+
+volumes:
+  logto_postgres:
+
